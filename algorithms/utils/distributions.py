@@ -57,7 +57,8 @@ class Categorical(nn.Module):
     def __init__(self, num_inputs, num_outputs, use_orthogonal=True, gain=0.01):
         super(Categorical, self).__init__()
         init_method = [nn.init.xavier_uniform_, nn.init.orthogonal_][use_orthogonal]
-        def init_(m): 
+
+        def init_(m):
             return init(m, init_method, lambda x: nn.init.constant_(x, 0), gain)
 
         self.linear = init_(nn.Linear(num_inputs, num_outputs))
@@ -91,8 +92,11 @@ class Categorical(nn.Module):
 #         action_logstd = self.logstd(zeros)
 #         return FixedNormal(action_mean, action_logstd.exp())
 
+
 class DiagGaussian(nn.Module):
-    def __init__(self, num_inputs, num_outputs, use_orthogonal=True, gain=0.01, args=None):
+    def __init__(
+        self, num_inputs, num_outputs, use_orthogonal=True, gain=0.01, args=None
+    ):
         super(DiagGaussian, self).__init__()
 
         init_method = [nn.init.xavier_uniform_, nn.init.orthogonal_][use_orthogonal]
@@ -104,7 +108,7 @@ class DiagGaussian(nn.Module):
             self.std_x_coef = args.std_x_coef
             self.std_y_coef = args.std_y_coef
         else:
-            self.std_x_coef = 1.
+            self.std_x_coef = 1.0
             self.std_y_coef = 0.5
         self.fc_mean = init_(nn.Linear(num_inputs, num_outputs))
         log_std = torch.ones(num_outputs) * self.std_x_coef
@@ -115,18 +119,21 @@ class DiagGaussian(nn.Module):
         action_std = torch.sigmoid(self.log_std / self.std_x_coef) * self.std_y_coef
         return FixedNormal(action_mean, action_std)
 
+
 class Bernoulli(nn.Module):
     def __init__(self, num_inputs, num_outputs, use_orthogonal=True, gain=0.01):
         super(Bernoulli, self).__init__()
         init_method = [nn.init.xavier_uniform_, nn.init.orthogonal_][use_orthogonal]
-        def init_(m): 
+
+        def init_(m):
             return init(m, init_method, lambda x: nn.init.constant_(x, 0), gain)
-        
+
         self.linear = init_(nn.Linear(num_inputs, num_outputs))
 
     def forward(self, x):
         x = self.linear(x)
         return FixedBernoulli(logits=x)
+
 
 class AddBias(nn.Module):
     def __init__(self, bias):
